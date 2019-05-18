@@ -289,12 +289,13 @@ class BayesSearchCV(BaseSearchCV):
         self.random_state = random_state
         self.optimizer_kwargs = optimizer_kwargs
         self._check_search_space(self.search_spaces)
+        self.fit_params = fit_params
 
         super(BayesSearchCV, self).__init__(
-             estimator=estimator, scoring=scoring, fit_params=fit_params,
-             n_jobs=n_jobs, iid=iid, refit=refit, cv=cv, verbose=verbose,
-             pre_dispatch=pre_dispatch, error_score=error_score,
-             return_train_score=return_train_score)
+            estimator=estimator, scoring=scoring,
+            n_jobs=n_jobs, iid=iid, refit=refit, cv=cv, verbose=verbose,
+            pre_dispatch=pre_dispatch, error_score=error_score,
+            return_train_score=return_train_score)
 
     def _check_search_space(self, search_space):
         """Checks whether the search space argument is correct"""
@@ -391,15 +392,15 @@ class BayesSearchCV(BaseSearchCV):
             n_jobs=self.n_jobs, verbose=self.verbose,
             pre_dispatch=pre_dispatch
         )(delayed(sklearn.model_selection._validation._fit_and_score)(
-                clone(base_estimator),
-                X, y, self.scorer_,
-                train, test, self.verbose, parameters,
-                fit_params=self.fit_params,
-                return_train_score=self.return_train_score,
-                return_n_test_samples=True,
-                return_times=True, return_parameters=True,
-                error_score=self.error_score
-            )
+            clone(base_estimator),
+            X, y, self.scorer_,
+            train, test, self.verbose, parameters,
+            fit_params=self.fit_params,
+            return_train_score=self.return_train_score,
+            return_n_test_samples=True,
+            return_times=True, return_parameters=True,
+            error_score=self.error_score
+        )
             for parameters in parameter_iterable
             for train, test in cv_iter)
 
@@ -456,10 +457,10 @@ class BayesSearchCV(BaseSearchCV):
         # applicable for that candidate. Use defaultdict as each candidate may
         # not contain all the params
         param_results = defaultdict(partial(
-                                            MaskedArray,
-                                            np.empty(n_candidates,),
-                                            mask=True,
-                                            dtype=object))
+            MaskedArray,
+            np.empty(n_candidates,),
+            mask=True,
+            dtype=object))
         for cand_i, params in enumerate(candidate_params):
             for name, value in params.items():
                 # An all masked empty array gets created for the key
